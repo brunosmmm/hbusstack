@@ -32,8 +32,10 @@
 //M TYPE
 #define OPCODE_MFHI	0xA
 #define OPCODE_MFLO	0xB
+#define OPCODE_MFRET    0x2
 
 #define OPCODE_M1	0xD
+#define OPCODE_RET      0xE
 
 #define FUNC_LHL	0x0
 #define FUNC_LIH	0x1
@@ -186,6 +188,7 @@ typedef struct CPUEMU_S
 	//extension registers
 	byte REGHI;
 	byte REGLO;
+        word REGRET;
 	
 	UCODE_INSTRUCTION INST; //instruction register
 	

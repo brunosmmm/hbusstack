@@ -148,6 +148,7 @@ void UCODE_STARTUP(void)
 	
 	CPUDATA.REGHI = 0;
 	CPUDATA.REGLO = 0;
+	CPUDATA.REGRET = 0;
 	
 	CPUDATA.STATUS = UCODE_RUNNING;
 	
@@ -350,9 +351,11 @@ void UCODE_CYCLE(void)
 			
 			//saves PC in 13,14
 			
-			CPUDATA.BANK[13] = (byte)(CPUDATA.PC>>8);
-			CPUDATA.BANK[14] = (byte)(CPUDATA.PC);
+			//CPUDATA.BANK[13] = (byte)(CPUDATA.PC>>8);
+			//CPUDATA.BANK[14] = (byte)(CPUDATA.PC);
 			
+		  CPUDATA.REGRET =  CPUDATA.PC;
+
 			//J type jump
 			
 		case OPCODE_J:
@@ -363,8 +366,8 @@ void UCODE_CYCLE(void)
 			break;
 			
 		case OPCODE_JR:
-			
-			CPUDATA.PC = CPUDATA.BANK[CPUDATA.INST.W.REGS]+CPUDATA.INST.W.OFFSET;
+		  //relative jump (-128 to +128)
+		  CPUDATA.PC = CPUDATA.PC +  (signed char)CPUDATA.BANK[CPUDATA.INST.W.REGS]+CPUDATA.INST.W.OFFSET;
 			
 			break;
 			
@@ -416,6 +419,14 @@ void UCODE_CYCLE(void)
 			CPUDATA.PC++;
 			
 			break;
+		 case OPCODE_MFRET:
+		   //move from ret register - to 14 & 15 (hardwired)
+		   CPUDATA.BANK[14] = (byte)(CPUDATA.REGRET >> 8);
+		   CPUDATA.BANK[15] = (byte)(CPUDATA.REGRET & 0xFF);
+		   
+		   CPUDATA.PC++;
+
+		   break;
 			
 		case OPCODE_M1:
 			
