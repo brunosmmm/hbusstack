@@ -17,55 +17,56 @@
 #define OPCODE_S	0x1
 
 //J TYPE
-#define OPCODE_J	0x8
-#define OPCODE_JAL	0x9
+#define OPCODE_J	0xF
+#define OPCODE_JAL	0xD
 
 //W TYPE
-#define OPCODE_BEQ 	0x6
-#define OPCODE_JR	0x7
-#define OPCODE_SW	0x4
-#define OPCODE_LW	0x5
+#define OPCODE_BZ_X 	0x8
+#define OPCODE_BZ_T     0x9
+#define OPCODE_BZ_N     0xA
+#define OPCODE_JR	0xC
+#define OPCODE_SW	0x2
+#define OPCODE_LW	0x3
 
 //L TYPE
-#define OPCODE_LIW	0xC //load immediate word BANK
+//#define OPCODE_LIW	0xC //load immediate word BANK
+#define OPCODE_LIU      0x4
+#define OPCODE_LIL      0x5
 
 //M TYPE
-#define OPCODE_MFHI	0xA
-#define OPCODE_MFLO	0xB
-#define OPCODE_MFRET    0x2
-
-#define OPCODE_M1	0xD
-#define OPCODE_RET      0xE
+#define OPCODE_M1	0xE
+#define OPCODE_BHLEQ    0x6
 
 #define FUNC_LHL	0x0
-#define FUNC_LIH	0x1
-#define FUNC_LIL	0x2
-#define FUNC_AIS	0x3
-
+#define FUNC_LHH        0x1
+#define FUNC_LLL        0x2
+#define FUNC_LLH        0x3
+#define FUNC_AIS        0x4
+#define FUNC_AIH        0x5
+#define FUNC_AIL        0x6
+#define FUNC_MFHI       0x7
+#define FUNC_MFLO       0x8
+#define FUNC_MTHI       0x9
+#define FUNC_MTLO       0xA
 
 //ARITHMETIC FUNCTIONS
-#define FUNC_ADD	0x0
-#define FUNC_SUB	0x1
-#define FUNC_AND	0x2
-#define FUNC_OR		0x3
-#define FUNC_XOR	0x4
-#define FUNC_NOT	0x5
-#define FUNC_MULT	0x6
+#define FUNC_ADD	0x2
+#define FUNC_SUB	0x6
+#define FUNC_AND	0x0
+#define FUNC_OR		0x1
+#define FUNC_XOR	0xF
+#define FUNC_NOR	0xC
+#define FUNC_MUL	0x3
 #define FUNC_SLT	0x7
-#define FUNC_DIV	0x8
-#if UCODE_ANEM_EXTENSION
-#define FUNC_ADDI	0x9
-#define FUNC_SUBI	0xA
-#define FUNC_ANDI	0xB
-#define FUNC_ORI	0xC
-#define FUNC_XORI	0xD
-#endif
+#define FUNC_SGT        0x8
+#define FUNC_DIV	0xA
 
 //SHIFT FUNCTIONS
-#define FUNC_SHR	0x0
-#define FUNC_SHL	0x1
-#define FUNC_ROR	0x2
-#define FUNC_ROL	0x3
+#define FUNC_SHR	0x1
+#define FUNC_SHL	0x2
+#define FUNC_ROR	0x4
+#define FUNC_ROL	0x8
+#define FUNC_SAR        0x0
 
 //FLAGS
 #define UCODE_PAUSE		0x01
@@ -73,7 +74,7 @@
 #define UCODE_ZERO		0x04
 
 //INTERRUPT
-#define OPCODE_INT	0xF
+#define OPCODE_INT	0xB
 
 //MISC
 #define UCODE_INST_OPCODE_MASK	0xF000
@@ -141,13 +142,28 @@ typedef struct CPU_INSTRUCTION_M
 	
 } UCODE_INSTRUCTION_M;
 
-typedef struct CPU_INSTRUCTION_M1
+typedef struct CPU_INSTRUCTION_M1 //LHL,LHH,LLL,LLH,AIS,AIH,AIL
 {
 	byte MOP 	: 4;
 	byte OPCODE	: 4;
 	byte DATA	: 8;
 	
 } UCODE_INSTRUCTION_M1;
+
+typedef struct CPU_INSTRUCTION_M2 //BHLEQ
+{
+  byte OPCODE : 4;
+  byte OFFSET : 12;
+} UCODE_INSTRUCTION_M1;
+
+typedef struct CPU_INSTRUCTION_M3  //MFHI,MFLO,MTHI,MTLO
+{
+  byte MOP : 4;
+  byte OPCODE : 4;
+  byte REG : 4;
+  byte _NULL_ : 4;
+
+} UCODE_INSTRUCTION_M3;
 
 typedef struct CPU_INSTRUCTION_GENERIC
 {
@@ -178,7 +194,6 @@ typedef struct CPUEMU_S
 {
 	//registradores
 	word PC;			//program counter
-	byte W;				//W register (acc)
 	byte BANK[16];		//register bank
 	
 	//byte ALUREG; //ALU OUT
@@ -188,7 +203,6 @@ typedef struct CPUEMU_S
 	//extension registers
 	byte REGHI;
 	byte REGLO;
-        word REGRET;
 	
 	UCODE_INSTRUCTION INST; //instruction register
 	
